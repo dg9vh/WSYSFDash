@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="YSFReflector-Dashboard by DG9VH">
+		<meta name="author" content="DG9VH">
+		<!-- So refresh works every time -->
+		<meta http-equiv="expires" content="0">
+		
+		<title>YSFReflector-Dashboard by DG9VH</title>
+		
+		<!-- Bootstrap core CSS -->
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<!-- Bootstrap core JavaScript -->
+		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+		<!-- Datatables -->
+		<link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+		<script type="text/javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+		<script type="text/javascript" src="js/config.js"></script>
+		<script type="text/javascript" src="js/functions.js"></script>
+		<link rel="stylesheet" href="css/styles.css">
+		<title>DG9VH - YSFReflector-Dashboard by DG9VH</title>
+	</head>
+	<body>
+		<!-- Navigation -->
+		<nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+			<div class="container-fluid">
+				<span class="float:left">
+					<a class="navbar-brand" href="#">YSFReflector-Dashboard by DG9VH</a>
+				</span>
+				<span class="navbar-brand float:right">Websocket-Based</span>
+			</div>
+		</nav>
+		
+		<ul class="nav nav-tabs" id="myTab" role="tablist">
+			<li class="nav-item">
+				<a class="nav-link" id="currtx-tab" data-toggle="tab" href="#currtx" role="tab" aria-controls="currtx" aria-selected="true">Currently TXing</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" id="lastheard-tab" data-toggle="tab" href="#lastheard" role="tab" aria-controls="lastheard" aria-selected="false">Last Heard</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" id="gateways-tab" data-toggle="tab" href="#gateways" role="tab" aria-controls="localheard" aria-selected="false">Connected Gateways</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" id="qso-tab" data-toggle="tab" href="#qso" role="tab" aria-controls="qso" aria-selected="false">In QSO</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" id="sysinfo-tab" data-toggle="tab" href="#sysinfo" role="tab" aria-controls="sysinfo" aria-selected="false">System Info</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" id="about-tab" data-toggle="tab" href="#about" role="tab" aria-controls="about" aria-selected="false">About</a>
+			</li>
+		</ul>
+		<div class="tab-content" id="myTabContent">
+			<div class="tab-pane fade" id="currtx" role="tabpanel" aria-labelledby="currtx-tab">
+				<div class="panel panel-default">
+					<!-- Standard-Panel-Inhalt -->
+					<div class="panel-heading">Currently TXing<span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-up"></i></span></div>
+					<div class="panel-body">
+						<!-- Tabelle -->
+						<div class="table-responsive">
+							<table id="currTX" class="table currTX table-condensed table-striped table-hover">
+								<thead>
+									<tr>
+										<th>Callsign</th>
+										<th>Target</th>
+										<th>Gateway</th>
+										<th>Dur (s)</th>
+									</tr>
+								</thead>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="tab-pane fade" id="lastheard" role="tabpanel" aria-labelledby="lastheard-tab">
+				<div class="panel panel-default">
+					<!-- Standard-Panel-Inhalt -->
+					<div class="panel-heading">Last Heard List of today's callsigns.<span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-up"></i></span></div>
+					<div class="panel-body">
+						<!-- Tabelle -->
+						<div class="table-responsive">
+							<table id="lastHeard" class="table lastHeard table-condensed table-striped table-hover">
+								<thead>
+									<tr>
+										<th>Time (UTC)</th>
+										<th>Callsign</th>
+										<th>Target</th>
+										<th>Gateway</th>
+										<th>Dur (s)</th>
+										<th>QSO</th>
+									</tr>
+								</thead>
+									<tr>
+									<td></td>
+									<td></td>
+									<td></td>
+									<td></td>
+									<td></td>
+									<td></td>
+									</tr>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="tab-pane fade" id="gateways" role="tabpanel" aria-labelledby="gateways-tab">
+				<div class="panel panel-default">
+					<!-- Standard-Panel-Inhalt -->
+					<div class="panel-heading">Connected Gateways<span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-up"></i></span></div>
+					<div class="panel-body">
+						<!-- Tabelle -->
+						<div class="table-responsive">
+							<table id="gatewaysTable" class="table gatewaysTable table-condensed table-striped table-hover">
+								<thead>
+									<tr>
+										<th>Time (UTC)</th>
+										<th>Callsign</th>
+									</tr>
+								</thead>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="tab-pane fade" id="qso" role="tabpanel" aria-labelledby="qso-tab">
+				<div class="panel panel-default">
+					<!-- Standard-Panel-Inhalt -->
+					<div class="panel-heading">Currently in QSO<span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-up"></i></span></div>
+					<div class="panel-body">
+						<!-- Tabelle -->
+						<div class="table-responsive">
+							<button id="button">Delete selected row</button>
+							<table id="inQSO" class="table inQSO table-condensed table-striped table-hover">
+								<thead>
+									<tr>
+										<th>Callsign</th>
+										<th>Added at</th>
+									</tr>
+								</thead>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="tab-pane fade" id="sysinfo" role="tabpanel" aria-labelledby="sysinfo-tab">
+				<div class="panel panel-default">
+					<!-- Standard-Panel-Inhalt -->
+					<div class="panel-heading">System Info<span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-up"></i></span></div>
+					<div class="panel-body">
+						<b>CPU:</b>
+						<ul>
+							<li>Temperature: <span id="cputemp"></span> °C</li>
+							<li>Frequency: <span id="cpufrg"></span> MHz</li>
+							<li>Usage: <span id="cpuusage"></span> %</li>
+						</ul>
+						<b>Load:</b>
+						<ul>
+							<li>Last Minute: <span id="cpu_load1"></span></li>
+							<li>Last 5 Minutes: <span id="cpu_load5"></span></li>
+							<li>Last 15 Minutes: <span id="cpu_load15"></span></li>
+						</ul>
+						<b>Memory:</b>
+						<ul>
+							<li>Total: <span id="ram_total"></span> MB</li>
+							<li>Used: <span id="ram_used"></span> MB</li>
+							<li>Free: <span id="ram_free"></span> MB</li>
+							<li>Usage: <span id="ram_percent_used"></span> %</li>
+						</ul>
+						<b>Disk:</b>
+						<ul>
+							<li>Total: <span id="disk_total"></span> GB</li>
+							<li>Used: <span id="disk_used"></span> GB</li>
+							<li>Free: <span id="disk_free"></span> GB</li>
+							<li>Usage: <span id="disk_percent_used"></span> %</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="tab-pane fade" id="about" role="tabpanel" aria-labelledby="about-tab">
+				<div class="panel panel-default">
+					<!-- Standard-Panel-Inhalt -->
+					<div class="panel-heading">About the Dashboard<span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-up"></i></span></div>
+					<div class="panel-body">
+						<p>This Dashboard uses websockets-technology to transfer data from host to client. It actually uses the logfile of the YSFReflector by G4KLX to get the entries into the different tables.</p>
+						<p>If you have any ideas or issues feel free to leave a comment/issue in <a target="_new" href="https://github.com/dg9vh/WSYSFDash">github</a>.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<footer class="footer">
+			<div class="container">
+				<span class="text-muted">YSFReflector-Dashboard by DG9VH | get your own at: <a href="https://github.com/dg9vh/WSYSFDash">https://github.com/dg9vh/WSYSFDash</a> | Follow me <a href="https://twitter.com/DG9VH">@DG9VH</a></span>
+			</div>
+		</footer>
+		<script>
+			var t_ct = $('#currTX').DataTable( {
+				"order": [[ 0, "asc" ]]
+			} );
+			
+			var t_gw = $('#gatewaysTable').DataTable( {
+				"order": [[ 1, "asc" ]]
+			} );
+			
+			var t_lh = $('#lastHeard').DataTable( {
+				"createdRow": function( row, data, dataIndex ) {
+					if ( data[5] == "TXing" ) {        
+						$(row).addClass('red');
+     					} else {
+						$(row).removeClass('red');
+     					}
+       				},
+				"order": [[ 0, "desc" ]],
+				"autoWidth": false
+			} );
+			
+			var ws0 = new WebSocket("ws://" + window.location.hostname + ":5678/SYSINFO");
+			ws0.onmessage = function (event) {
+				getSysInfo(document, event);
+			};
+			
+			var ws1 = new WebSocket("ws://" + window.location.hostname + ":5678/YSFReflector");
+			ws1.onmessage = function (event) {
+				getLastHeard(document, event);
+				getGateways(document, event);
+			};
+			t_lh.order( [ 0, 'desc' ] ).draw();
+			
+			
+			var t_qso = $('#inQSO').DataTable( {
+				"order": [[ 0, "asc" ]]
+			} );
+			
+			$('#inQSO tbody').on( 'click', 'tr', function () {
+				if ( $(this).hasClass('selected') ) {
+					$(this).removeClass('selected');
+				} else {
+					t_qso.$('tr.selected').removeClass('selected');
+					$(this).addClass('selected');
+				}
+			} );
+			
+			$('#button').click( function () {
+				t_qso.row('.selected').remove().draw( false );
+			} );
+		</script>
+	</body>
+</html>

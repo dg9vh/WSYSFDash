@@ -1,0 +1,14 @@
+[Unit]
+Description=Python3 logtailer for WSYSFDash
+After=network.target
+
+[Service]
+ExecStartPre=/bin/sleep 10
+Type=simple
+Restart=always
+# Modify for different location of Python3 or location of files
+WorkingDirectory=/opt/WSYSFDash/
+ExecStart=/usr/bin/python3 /opt/WSYSFDash/logtailer.py
+
+[Install]
+WantedBy=multi-user.target
