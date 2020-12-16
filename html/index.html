@@ -87,7 +87,9 @@
 							<table id="lastHeard" class="table lastHeard table-condensed table-striped table-hover">
 								<thead>
 									<tr>
-										<th>Time (UTC)</th>
+										<th>Time (<script language="JavaScript">
+										document.write(getTimezone());
+										</script>)</th>
 										<th>Callsign</th>
 										<th>Target</th>
 										<th>Gateway</th>
@@ -118,7 +120,9 @@
 							<table id="gatewaysTable" class="table gatewaysTable table-condensed table-striped table-hover">
 								<thead>
 									<tr>
-										<th>Time (UTC)</th>
+										<th>Time (<script language="JavaScript">
+										document.write(getTimezone());
+										</script>)</th>
 										<th>Callsign</th>
 									</tr>
 								</thead>
@@ -139,8 +143,12 @@
 								<thead>
 									<tr>
 										<th>Callsign</th>
-										<th>Added at</th>
-										<th>Last TX at</th>
+										<th>Added at (<script language="JavaScript">
+										document.write(getTimezone());
+										</script>)</th>
+										<th>Last TX at (<script language="JavaScript">
+										document.write(getTimezone());
+										</script>)</th>
 									</tr>
 								</thead>
 							</table>
