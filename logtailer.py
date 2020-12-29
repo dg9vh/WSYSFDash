@@ -49,8 +49,8 @@ async def view_log(websocket, path):
             day = "0" + day
         
         file_path = ""
-        if path == "/YSFReflector":
-            file_path = config['YSFReflector']['Logdir']+config['YSFReflector']['Prefix']+"-"+year+"-"+month+"-"+day+".log"
+        if path.startswith("/YSFReflector"):
+            file_path = config[path[1:]]['Logdir']+config[path[1:]]['Prefix']+"-"+year+"-"+month+"-"+day+".log"
             logging.info(file_path)
             
             if not os.path.isfile(file_path):
