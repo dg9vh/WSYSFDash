@@ -39,7 +39,7 @@ async def view_log(websocket, path):
             raise ValueError('Fail to parse URL', format(path))
 
         path = os.path.abspath(parse_result.path)
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(datetime.timezone.utc)
         year = str(now.year)
         month = str(now.month)
         if len(month) == 1:
