@@ -39,7 +39,7 @@ async def view_log(websocket, path):
             raise ValueError('Fail to parse URL', format(path))
 
         path = os.path.abspath(parse_result.path)
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(datetime.timezone.utc)
         year = str(now.year)
         month = str(now.month)
         if len(month) == 1:
@@ -50,14 +50,17 @@ async def view_log(websocket, path):
         
         file_path = ""
         if path.startswith("/YSFReflector"):
-            file_path = config[path[1:]]['Logdir']+config[path[1:]]['Prefix']+"-"+year+"-"+month+"-"+day+".log"
+            if config['DEFAULT']['Filerotate'] == "True":
+                file_path = config[path[1:]]['Logdir']+config[path[1:]]['Prefix']+"-"+year+"-"+month+"-"+day+".log"
+            else:
+                file_path = config[path[1:]]['Logdir']+config[path[1:]]['Prefix']+".log"
             logging.info(file_path)
             
             if not os.path.isfile(file_path):
                 raise ValueError('File not found', format(file_path))
 
             with open(file_path, newline = '\n', encoding="utf8", errors='ignore') as f:
-                content = ''.join(deque(f))
+                content = ''.join(deque(f, int(config['DEFAULT']['MaxLines'])))
                 content = conv.convert(content, full=False)
                 lines = content.split("\n")
                 for line in lines:
