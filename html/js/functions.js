@@ -137,7 +137,7 @@ function copyToQSO(callsign) {
 			callsign,
 			getLocaltimeFromTimestamp(date[0] + " " + date[1].substring(0, date[1].indexOf("."))),
 			""
-		] ).draw();
+		] ).draw(false);
 	});
 	alert("" + callsign + " added to in QSO-Tab");
 	
@@ -153,16 +153,16 @@ function getCurrentTXing() {
 				data[2] = txtimestamp;
 				$('#inQSO').dataTable().fnUpdate(data,idx,undefined,false);
 			}
-		}).draw();
+		}).draw(false);
 	}
-	t_ct.clear().draw();
+	t_ct.clear().draw(false);
 	if (tx != null) {
 		t_ct.row.add( [
 			tx[0],
 			tx[1],
 			tx[2],
 			tx[3]
-		] ).draw();
+		] ).draw(false);
 	}
 }
 
@@ -254,7 +254,7 @@ function getLastHeard(document, event) {
 							gateway,
 							duration,
 							addToQSO
-						] ).draw();
+						] ).draw(false);
 					}
 				}
 				var row = t_lh.row(rowIndexes[0]).node();
