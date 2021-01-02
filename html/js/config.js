@@ -18,3 +18,6 @@ var defaultTab = "LastHeardTab";
 
 // Set displayed timezone and timestamp to timezone of browser if 1, else use UTC for displaying
 var useClientTimezone = 1;
+
+// Set this to to the section-name in your logtailer.ini that contains the logpath of your reflector
+var WebsocketsPath = "YSFReflector";

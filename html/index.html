@@ -245,12 +245,17 @@
 				"autoWidth": false
 			} );
 			
-			var ws0 = new WebSocket("ws://" + window.location.hostname + ":5678/SYSINFO");
+			var wsprot = "ws://";
+			if (location.protocol == "https:") {
+				wsprot = "wss://";
+			}
+			
+			var ws0 = new WebSocket(wsprot + window.location.hostname + ":5678/SYSINFO");
 			ws0.onmessage = function (event) {
 				getSysInfo(document, event);
 			};
 			
-			var ws1 = new WebSocket("ws://" + window.location.hostname + ":5678/YSFReflector");
+			var ws1 = new WebSocket(wsprot + window.location.hostname + ":5678/" + WebsocketsPath);
 			ws1.onmessage = function (event) {
 				getLastHeard(document, event);
 				getGateways(document, event);
