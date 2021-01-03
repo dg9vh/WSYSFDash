@@ -150,7 +150,7 @@ function getCurrentTXing() {
 		tx[3] = Math.round((Date.now() - Date.parse(txtimestamp.replace(" ","T")+".000Z"))/1000);
 		t_qso.rows( function ( idx, data, node ) {
 			if(data[0] == tx[0]){
-				data[2] = txtimestamp;
+				data[2] = getLocaltimeFromTimestamp(txtimestamp);
 				$('#inQSO').dataTable().fnUpdate(data,idx,undefined,false);
 			}
 		}).draw(false);
