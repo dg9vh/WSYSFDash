@@ -1,5 +1,5 @@
 var txingdata = null;
-var txtimestamp = null;
+var txtimestamp = "";
 
 setInterval(getCurrentTXing, 1000);
 // 00000000001111111111222222222233333333334444444444555555555566666666667777777777888888888899999999990000000000111111111122222222223333333333
@@ -187,37 +187,15 @@ function getLastHeard(document, event) {
 			txing = false;
 			var duration = 0;
 			
-			if (line.length > 0 && (line.indexOf("Received") > 0 || line.indexOf("Network watchdog") > 0)) {
-				if (line.indexOf("Received data") > 0) {
+			// Check, if begin or end of transmission
+			
+			if (line.length > 0 && (line.indexOf("Received data from") > 0 || line.indexOf("Network watchdog has expired") > 0 || line.indexOf("Received end of transmission") > 0)) {
+				// Begin of transmission
+				if (line.indexOf("Received data from") > 0) {
 					txing = true;
 					
 					txingdata = line.substring(line.indexOf("from") + 5, line.indexOf("to")).trim() + ";" + getTarget(line)  + ";" + getGateway(line);
 					txtimestamp = getRawTimestamp(line);
-				}
-
-				if (line.indexOf("Network watchdog") > 0 || line.indexOf("end of transmission") > 0) {
-					logIt("Network Watchdog!");
-					var rowIndexes = [];
-					t_lh.rows( function ( idx, data, node ) {
-						if(data[0] == txtimestamp){
-							rowIndexes.push(idx);
-						}
-					});
-					
-					duration = Math.round(Date.parse(getRawTimestamp(line).replace(" ","T")+".000Z")/1000 - Date.parse(txtimestamp.replace(" ","T")+".000Z")/1000);
-					logIt("Length: " + t_lh.data().length);
-					
-					var temp = t_lh.row(t_lh.data().length - 1).data();
-					temp[4] = duration;
-					$('#lastHeard').dataTable().fnUpdate(temp,t_lh.data().length - 1,undefined,false);
-					txing = false;
-					txingdata = null;
-				}
-				
-				logIt("txingdata: " + txingdata + "|" + txtimestamp);
-				getCurrentTXing();
-				
-				if (line.indexOf("Network watchdog") < 0 && line.indexOf("end of transmission") < 0) {
 					var rowIndexes = [],
 					timestamp = getTimestamp(line),
 					callsign = getCallsign(line),
@@ -225,15 +203,19 @@ function getLastHeard(document, event) {
 					gateway = getGateway(line),
 					duration = getDuration(line),
 					addToQSO = getAddToQSO(line);
-					if (txing) {
-						duration = "TXing";
-					}
+					duration = "TXing";
+					logIt(callsign);
 					t_lh.rows( function ( idx, data, node ) {
 						if(data[1] == callsign){
+							logIt("Adding " + callsign + " to Array!");
 							rowIndexes.push(idx);
 						}
 						return false;
 					});
+					logIt(rowIndexes);
+					if (rowIndexes[0] == "0") {
+						rowIndexes[0] = rowIndexes[1];
+					}
 					if (rowIndexes[0]) {
 						
 						newData = [
@@ -245,7 +227,8 @@ function getLastHeard(document, event) {
 							addToQSO
 						]
 						t_lh.row(rowIndexes[0]).data( newData ).draw(false);
-						
+						var row = t_lh.row(rowIndexes[0]).node();
+						$(row).addClass('red');
 					} else {
 						t_lh.row.add( [
 							timestamp,
@@ -257,15 +240,58 @@ function getLastHeard(document, event) {
 						] ).draw(false);
 					}
 				}
-				var row = t_lh.row(rowIndexes[0]).node();
-				if (txing) {
-					$(row).addClass('red');
-				} else {
-					$(row).removeClass('red');
+				// End of transmission
+				if (line.indexOf("Network watchdog has expired") > 0 || line.indexOf("Received end of transmission") > 0) {
+					var rowIndexes = [];
+					if (line.indexOf("Network watchdog has expired") > 0) {
+						logIt("Network Watchdog!");
+					}
+					if (line.indexOf("Received end of transmission") > 0) {
+						logIt("end of transmission!");
+					}
+					
+					duration = Math.round(Date.parse(getRawTimestamp(line).replace(" ","T")+".000Z")/1000 - Date.parse(txtimestamp.replace(" ","T")+".000Z")/1000);
+					logIt("Length: " + t_lh.data().length);
+					logIt("duration: " + duration);
+					logIt("TxTimestamp: " + txtimestamp);
+					t_lh.rows( function ( idx, data, node ) {
+						logIt("Data[0]" + data[0]);
+						logIt(getLocaltimeFromTimestamp(txtimestamp));
+						if(data[0] == getLocaltimeFromTimestamp(txtimestamp)){
+							rowIndexes.push(idx);
+						}
+						return false;
+					});
+					logIt(rowIndexes);
+					if (rowIndexes[0]) {
+						if (rowIndexes[0] == "0") {
+							rowIndexes[0] = rowIndexes[1];
+						}
+						
+						var temp = t_lh.row(rowIndexes[0]).data();
+						
+						newData = [
+							temp[0],
+							temp[1],
+							temp[2],
+							temp[3],
+							duration,
+							temp[5]
+						]
+						t_lh.row(rowIndexes[0]).data( newData ).draw(false);
+						var row = t_lh.row(rowIndexes[0]).node();
+						$(row).removeClass('red');
+					} else {
+						var temp = t_lh.row(t_lh.data().length - 1).data();
+						temp[4] = duration;
+						logIt("temp[4]: " + temp[4]);
+						var row = t_lh.row(t_lh.data().length - 1).node();
+						$(row).removeClass('red');
+						$('#lastHeard').dataTable().fnUpdate(temp,t_lh.data().length - 1,undefined,false);
+					}
+					txing = false;
+					txingdata = null;
 				}
-				var temp = t_lh.row(rowIndexes[0]).data();
-				temp[4] = duration;
-				$('#lastHeard').dataTable().fnUpdate(temp,rowIndexes[0],undefined,false);
 			}
 		});
 	});
