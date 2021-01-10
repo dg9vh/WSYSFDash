@@ -12,7 +12,11 @@ setInterval(getCurrentTXing, 1000);
 // M: 2020-11-28 10:11:27.317 Received end of transmission
 
 function logIt(message) {
-	if (debug == 1 || message.startsWith("Logtailer-Errormessage:")) {
+	var stringmessage = false;
+	if (typeof message == "string") {
+		stringmessage = true;
+	}
+	if (debug == 1 || (stringmessage && message.startsWith("Logtailer-Errormessage:"))) {
 		console.log(message);
 	}
 }
