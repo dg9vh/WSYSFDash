@@ -242,6 +242,8 @@ function getLastHeard(document, event) {
 							duration,
 							addToQSO
 						] ).draw(false);
+						var row = t_lh.row(t_lh.data().length - 1).node();
+						$(row).addClass('red');
 					}
 				}
 				// End of transmission
