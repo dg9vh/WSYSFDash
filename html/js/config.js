@@ -1,20 +1,19 @@
+// config structure version, please change to value in github-file after update and adding new values
+var config_struc_ver = 20210312.1;
+
 // 1 = show link to QRZ.com, 0 = off
 var qrz = 1;
 
 // 1 = enable debug in javascript-console, 0 = 0ff
 var debug = 0;
 
-// 1 = show tab, 0 = suppress it
-var showCurrTXTab = 1;
-var showLastHeardTab = 1;
-var showGatewaysTab = 1;
-var showInQSOTab = 1;
-var showSysInfoTab = 1;
-var showAboutTab = 1;
-
-// default-tab to show
-// chose from following list: CurrTXTab, LastHeardTab, GatewaysTab, InQSOTab, SysInfoTab, AboutTab
-var defaultTab = "LastHeardTab";
+// 1 = show tab, 2 = show tab and make it default-tab on startup, 0 = suppress it
+var currtx = 1;
+var lastheard = 2;
+var gateways = 1;
+var qso = 1;
+var sysinfo = 1;
+var about = 1;
 
 // Set displayed timezone and timestamp to timezone of browser if 1, else use UTC for displaying
 var useClientTimezone = 1;

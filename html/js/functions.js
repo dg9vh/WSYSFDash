@@ -1,3 +1,4 @@
+var act_config_struc_ver = 20210312.1;
 var txingdata = null;
 var txtimestamp = "";
 
@@ -18,6 +19,12 @@ function logIt(message) {
 	}
 	if (debug == 1 || (stringmessage && message.startsWith("Logtailer-Errormessage:"))) {
 		console.log(message);
+	}
+}
+
+function checkConfigStructure() {
+	if (typeof config_struc_ver === "undefined" || config_struc_ver < act_config_struc_ver) {
+		$('#configstructmodal').modal('show');
 	}
 }
 
@@ -364,87 +371,26 @@ function getSysInfo(document, event) {
 	});
 }
 
-$(document).ready(function() {
-	if(showCurrTXTab == 0){
-		document.getElementById("myTab").children[0].style.display="none";
-		document.getElementById("currtx").style.display="none";
-	}
-	if(showLastHeardTab == 0){
-		document.getElementById("myTab").children[1].style.display="none";
-		document.getElementById("lastheard").style.display="none";
-	}
-	if(showGatewaysTab == 0){
-		document.getElementById("myTab").children[2].style.display="none";
-		document.getElementById("gateways").style.display="none";
-	}
-	if(showInQSOTab == 0){
-		document.getElementById("myTab").children[3].style.display="none";
-		document.getElementById("qso").style.display="none";
-	}
-	if(showSysInfoTab == 0){
-		document.getElementById("myTab").children[4].style.display="none";
-		document.getElementById("sysinfo").style.display="none";
-	}
-	if(showAboutTab == 0){
-		document.getElementById("myTab").children[5].style.display="none";
-		document.getElementById("about").style.display="none";
-	}
+function activateDefaultTab(name) {
+	var element = document.getElementById(name + "-tab");
+	element.classList.add("active");
 	
-	switch (defaultTab) {
-		case "CurrTXTab":
-			var element = document.getElementById("currtx-tab");
-			element.classList.add("active");
-			element = document.getElementById("currtx");
-			element.classList.add("show");
-			element.classList.add("active");
-			break;
-		case "LastHeardTab":
-			var element = document.getElementById("lastheard-tab");
-			element.classList.add("active");
-			
-			var element = document.getElementById("lastheard");
-			element.classList.add("show");
-			element.classList.add("active");
-			break;
-		case "GatewaysTab":
-			var element = document.getElementById("gateways-tab");
-			element.classList.add("active");
-			
-			var element = document.getElementById("gateways");
-			element.classList.add("show");
-			element.classList.add("active");
-			break;
-		case "InQSOTab":
-			var element = document.getElementById("qso-tab");
-			element.classList.add("active");
-			
-			var element = document.getElementById("qso");
-			element.classList.add("show");
-			element.classList.add("active");
-			break;
-		case "SysInfoTab":
-			var element = document.getElementById("sysinfo-tab");
-			element.classList.add("active");
-			
-			var element = document.getElementById("sysinfo");
-			element.classList.add("show");
-			element.classList.add("active");
-			break;
-		case "AboutTab":
-			var element = document.getElementById("about-tab");
-			element.classList.add("active");
-			
-			var element = document.getElementById("about");
-			element.classList.add("show");
-			element.classList.add("active");
-			break;
-		default:
-			var element = document.getElementById("currtx-tab");
-			element.classList.add("active");
-			
-			element = document.getElementById("currtx");
-			element.classList.add("show");
-			element.classList.add("active");
-			break;
+	var element = document.getElementById(name);
+	element.classList.add("show");
+	element.classList.add("active");
+}
+
+$(document).ready(function() {
+	defaultSet = false;
+	for (i = 0; i < document.getElementById("myTab").children.length; ++i) {
+		tabname = document.getElementById("myTab").children[i].getAttribute("name");
+		if (eval(tabname) == 0) {
+			document.getElementById("myTab").children[i].style.display="none";
+			document.getElementById(tabname).style.display="none";
+		}
+		if (eval(tabname) == 2) {
+			activateDefaultTab(tabname);
+			defaultSet = true;
+		}
 	}
 });
