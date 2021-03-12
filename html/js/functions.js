@@ -1,4 +1,4 @@
-var act_config_struc_ver = 20210312.1;
+var act_config_struc_ver = 20210312.2;
 var txingdata = null;
 var txtimestamp = "";
 
@@ -88,6 +88,7 @@ function getCallsign(logline) {
 // M: 2020-11-28 10:10:09.729     DB1ZD     : 3/60
 // M: 2020-11-28 10:10:09.729     2622-DL   : 1/60
 // M: 2020-11-28 10:10:09.729     DO8DHH    : 0/60
+// M: 2021-03-12 17:31:33.004      DG9VH     : 192.168.178.33:42011 3/60
 // M: 2020-11-28 10:11:26.555 Received data from DL5STX     to ALL        at 2622-DL
 // M: 2020-11-28 10:11:27.317 Received end of transmission
 
@@ -179,6 +180,10 @@ function getCurrentTXing() {
 
 function getGatewayCallsign(line) {
 	return line.substring(31, 41);
+}
+
+function getGatewayIpAndPort(line) {
+	return line.substring(44, 64);
 }
 
 function getLastHeard(document, event) {
@@ -309,6 +314,98 @@ function getLastHeard(document, event) {
 		});
 	});
 }
+
+function getAllHeard(document, event) {
+	$(document).ready(function() {
+		lines = event.data.split("\n");
+		lines.forEach(function(line, index, array) {
+			logIt(line);
+			txing = false;
+			var duration = 0;
+			
+			// Check, if begin or end of transmission
+			
+			if (line.length > 0 && (line.indexOf("Received data from") > 0 || line.indexOf("Network watchdog has expired") > 0 || line.indexOf("Received end of transmission") > 0)) {
+				// Begin of transmission
+				if (line.indexOf("Received data from") > 0) {
+					txing = true;
+					
+					txtimestamp = getRawTimestamp(line);
+					var rowIndexes = [],
+					timestamp = getTimestamp(line),
+					callsign = getCallsign(line),
+					target = getTarget(line),
+					gateway = getGateway(line),
+					duration = getDuration(line);
+					duration = "TXing";
+					logIt(callsign);
+					
+					t_allh.row.add( [
+						timestamp,
+						callsign,
+						target,
+						gateway,
+						duration
+					] ).draw(false);
+					var row = t_allh.row(t_allh.data().length - 1).node();
+					$(row).addClass('red');
+				}
+				// End of transmission
+				if (line.indexOf("Network watchdog has expired") > 0 || line.indexOf("Received end of transmission") > 0) {
+					var rowIndexes = [];
+					if (line.indexOf("Network watchdog has expired") > 0) {
+						logIt("Network Watchdog!");
+					}
+					if (line.indexOf("Received end of transmission") > 0) {
+						logIt("end of transmission!");
+					}
+					
+					duration = Math.round(Date.parse(getRawTimestamp(line).replace(" ","T")+".000Z")/1000 - Date.parse(txtimestamp.replace(" ","T")+".000Z")/1000);
+					logIt("Length: " + t_allh.data().length);
+					logIt("duration: " + duration);
+					logIt("TxTimestamp: " + txtimestamp);
+					t_allh.rows( function ( idx, data, node ) {
+						logIt("Data[0]" + data[0]);
+						logIt(getLocaltimeFromTimestamp(txtimestamp));
+						if(data[0] == getLocaltimeFromTimestamp(txtimestamp)){
+							rowIndexes.push(idx);
+						}
+						return false;
+					});
+					logIt(rowIndexes);
+					if (rowIndexes[0]) {
+						if (rowIndexes[0] == "0") {
+							rowIndexes[0] = rowIndexes[1];
+						}
+						
+						var temp = t_allh.row(rowIndexes[0]).data();
+						
+						newData = [
+							temp[0],
+							temp[1],
+							temp[2],
+							temp[3],
+							duration
+						]
+						t_allh.row(rowIndexes[0]).data( newData ).draw(false);
+						var row = t_allh.row(rowIndexes[0]).node();
+						$(row).removeClass('red');
+					} else {
+						var temp = t_allh.row(t_allh.data().length - 1).data();
+						temp[4] = duration;
+						logIt("temp[4]: " + temp[4]);
+						var row = t_allh.row(t_allh.data().length - 1).node();
+						$(row).removeClass('red');
+						$('#allHeard').dataTable().fnUpdate(temp,t_allh.data().length - 1,undefined,false);
+					}
+					txing = false;
+					txingdata = null;
+				}
+			}
+		});
+	});
+}
+
 // 00000000001111111111222222222233333333334444444444555555555566666666667777777777888888888899999999990000000000111111111122222222223333333333
 // 01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
 // M: 2020-11-28 10:10:09.729 Currently linked repeaters/gateways:
@@ -326,7 +423,8 @@ function getGateways(document, event) {
 				if (line.indexOf("/60") > 0 ) {
 					t_gw.row.add( [
 						getTimestamp(line),
-						getGatewayCallsign(line)
+						getGatewayCallsign(line),
+						getGatewayIpAndPort(line)
 					] ).draw(false);
 				}
 			}
