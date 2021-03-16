@@ -179,7 +179,7 @@ function getCurrentTXing() {
 }
 
 function getGatewayCallsign(line) {
-	return line.substring(31, 41);
+	return line.substring(31, 42);
 }
 
 function getGatewayIpAndPort(line) {
