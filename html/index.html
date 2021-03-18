@@ -88,7 +88,10 @@
 				<a class="nav-link" id="allheard-tab" data-toggle="tab" href="#allheard" role="tab" aria-controls="allheard" aria-selected="false">All Heard</a>
 			</li>
 			<li class="nav-item" name="gateways">
-				<a class="nav-link" id="gateways-tab" data-toggle="tab" href="#gateways" role="tab" aria-controls="localheard" aria-selected="false">Connected Gateways</a>
+				<a class="nav-link" id="gateways-tab" data-toggle="tab" href="#gateways" role="tab" aria-controls="gateways" aria-selected="false">Connected Gateways</a>
+			</li>
+			<li class="nav-item" name="mutedgateways">
+				<a class="nav-link" id="mutedgateways-tab" data-toggle="tab" href="#mutedgateways" role="tab" aria-controls="mutedgateways" aria-selected="false">Muted Gateways</a>
 			</li>
 			<li class="nav-item" name="qso">
 				<a class="nav-link" id="qso-tab" data-toggle="tab" href="#qso" role="tab" aria-controls="qso" aria-selected="false">In QSO</a>
@@ -179,6 +182,28 @@
 						<!-- Tabelle -->
 						<div class="table-responsive">
 							<table id="gatewaysTable" class="table gatewaysTable table-condensed table-striped table-hover">
+								<thead>
+									<tr>
+										<th>Time (<script language="JavaScript">
+										document.write(getTimezone());
+										</script>)</th>
+										<th>Callsign</th>
+										<th>IP/Port</th>
+									</tr>
+								</thead>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="tab-pane fade" id="mutedgateways" role="tabpanel" aria-labelledby="mutedgateways-tab">
+				<div class="panel panel-default">
+					<!-- Standard-Panel-Inhalt -->
+					<div class="panel-heading">Muted Gateways<span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-up"></i></span></div>
+					<div class="panel-body">
+						<!-- Tabelle -->
+						<div class="table-responsive">
+							<table id="mutedgatewaysTable" class="table mutedgatewaysTable table-condensed table-striped table-hover">
 								<thead>
 									<tr>
 										<th>Time (<script language="JavaScript">
@@ -284,6 +309,17 @@
 				"autoWidth": false
 			} );
 			
+			var t_mgw = $('#mutedgatewaysTable').DataTable( {
+				"order": [[ 1, "asc" ]],
+				"columnDefs": [
+					{
+						"targets": [ 2 ],
+						"visible": showGatewayIP
+					}
+				],
+				"autoWidth": false
+			} );
+			
 			var t_lh = $('#lastHeard').DataTable( {
 				"createdRow": function( row, data, dataIndex ) {
 					if ( data[5] == "TXing" ) {        
@@ -319,6 +355,7 @@
 				getLastHeard(document, event);
 				getAllHeard(document, event);
 				getGateways(document, event);
+				getMutedGateways(document, event);
 			};
 			t_lh.order( [ 0, 'desc' ] ).draw();
 			
