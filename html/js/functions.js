@@ -196,7 +196,7 @@ function getGatewayCallsign(line) {
 }
 
 function getGatewayIpAndPort(line) {
-	return line.substring(44, line.indexOf("/60") - 1 );
+	return line.substring(44, line.lastIndexOf(" "));
 }
 
 function getLastHeard(document, event) {
