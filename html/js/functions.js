@@ -1,4 +1,4 @@
-var act_config_struc_ver = 20210318.01;
+var act_config_struc_ver = 20210321.01;
 var txingdata = null;
 var txtimestamp = "";
 var fill_gw = false;
@@ -55,6 +55,19 @@ function getTimezone() {
 		return "UTC";
 	}
 }
+
+function inDashboardBlacklist(logline) {
+	callsign = logline.substring(logline.indexOf("from") + 5, logline.indexOf("to")).trim();
+	name = "";
+	if (callsign.indexOf("$") > 0) {
+		name = callsign.substring(callsign.indexOf("$") + 1, callsign.lastIndexOf("$"));
+		if (name == "$")
+			name = "";
+		callsign = callsign.substring(0, callsign.indexOf("$"));
+	}
+	return dashboard_blacklist.includes(callsign);
+}
+
 function getLocaltimeFromTimestamp(timestamp) {
 	logIt(timestamp);
 	if (useClientTimezone) {
@@ -64,7 +77,6 @@ function getLocaltimeFromTimestamp(timestamp) {
 		return timestamp;
 	}
 }
-
 
 function getRawTimestamp(logline) {
 	return logline.substring(3,22);
@@ -81,7 +93,7 @@ function getCallsign(logline) {
 	} else {
 		callsign = logline.substring(logline.indexOf("from") + 5, logline.indexOf("to")).trim();
 	}
-	if (qrz == 1) {
+	if (qrz == 1 && !qrz_blacklist.includes(callsign)) {
 		return '<a target="_new" href="https://qrz.com/db/' + callsign + '">' + callsign + '</a>';
 	} else {
 		return callsign;
@@ -213,130 +225,132 @@ function getLastHeard(document, event) {
 		lines = event.data.split("\n");
 		lines.forEach(function(line, index, array) {
 			logIt(line);
-			txing = false;
-			var duration = 0;
-			
-			// Check, if begin or end of transmission
-			
-			if (line.length > 0 && (((line.indexOf("ata from") > 0 || line.indexOf("Network watchdog has expired") > 0 || line.indexOf("Received end of transmission") > 0) && showBlockedTX == 0 && line.indexOf("blocked/") < 0) || showBlockedTX == 1 && (line.indexOf("ata from") > 0 || line.indexOf("Network watchdog has expired") > 0 || line.indexOf("Received end of transmission") > 0))) {
-				// Begin of transmission
-				if (line.indexOf("ata from") > 0) {
-					
-					txing = true;
-					if (line.indexOf("blocked/") > 0) {
-						txingdata = null;
-					} else {
-						txingdata = line.substring(line.indexOf("from") + 5, line.indexOf("to")).trim() + ";" + getTarget(line)  + ";" + getGateway(line);
-					}
-					logIt("txingdata: " + txingdata);
-					
-					txtimestamp = getRawTimestamp(line);
-					var rowIndexes = [],
-					timestamp = getTimestamp(line),
-					callsign = getCallsign(line),
-					target = getTarget(line),
-					gateway = getGateway(line),
-					duration = getDuration(line),
-					addToQSO = getAddToQSO(line);
-					duration = "TXing";
-					if (line.indexOf("blocked/") > 0) {
-						duration = "muted";
-					}
-					logIt(callsign);
-					t_lh.rows( function ( idx, data, node ) {
-						if(data[1] == callsign){
-							logIt("Adding " + callsign + " to Array!");
-							rowIndexes.push(idx);
-						}
-						return false;
-					});
-					logIt("rowIndexes: " + rowIndexes);
-					if (rowIndexes[0] == "0") {
-						rowIndexes[0] = rowIndexes[1];
-					}
-					if (rowIndexes[0]) {
+			if (!inDashboardBlacklist(line)) {
+				txing = false;
+				var duration = 0;
+				
+				// Check, if begin or end of transmission
+				
+				if (line.length > 0 && (((line.indexOf("ata from") > 0 || line.indexOf("Network watchdog has expired") > 0 || line.indexOf("Received end of transmission") > 0) && showBlockedTX == 0 && line.indexOf("blocked/") < 0) || showBlockedTX == 1 && (line.indexOf("ata from") > 0 || line.indexOf("Network watchdog has expired") > 0 || line.indexOf("Received end of transmission") > 0))) {
+					// Begin of transmission
+					if (line.indexOf("ata from") > 0) {
 						
-						newData = [
-							timestamp,
-							callsign,
-							target,
-							gateway,
-							duration,
-							addToQSO
-						]
-						t_lh.row(rowIndexes[0]).data( newData ).draw(false);
-						var row = t_lh.row(rowIndexes[0]).node();
+						txing = true;
 						if (line.indexOf("blocked/") > 0) {
-							$(row).removeClass('red');
+							txingdata = null;
 						} else {
-							$(row).addClass('red');
+							txingdata = line.substring(line.indexOf("from") + 5, line.indexOf("to")).trim() + ";" + getTarget(line)  + ";" + getGateway(line);
 						}
-					} else {
-						t_lh.row.add( [
-							timestamp,
-							callsign,
-							target,
-							gateway,
-							duration,
-							addToQSO
-						] ).draw(false);
-						var row = t_lh.row(t_lh.data().length - 1).node();
+						logIt("txingdata: " + txingdata);
+						
+						txtimestamp = getRawTimestamp(line);
+						var rowIndexes = [],
+						timestamp = getTimestamp(line),
+						callsign = getCallsign(line),
+						target = getTarget(line),
+						gateway = getGateway(line),
+						duration = getDuration(line),
+						addToQSO = getAddToQSO(line);
+						duration = "TXing";
 						if (line.indexOf("blocked/") > 0) {
-							$(row).removeClass('red');
-						} else {
-							$(row).addClass('red');
+							duration = "muted";
 						}
-					}
-				}
-				// End of transmission
-				if (line.indexOf("Network watchdog has expired") > 0 || line.indexOf("Received end of transmission") > 0 || line.indexOf("Removed from blockeds") > 0 ) {
-					var rowIndexes = [];
-					if (line.indexOf("Network watchdog has expired") > 0) {
-						logIt("Network Watchdog!");
-					}
-					if (line.indexOf("Received end of transmission") > 0) {
-						logIt("end of transmission!");
-					}
-					
-					duration = Math.round(Date.parse(getRawTimestamp(line).replace(" ","T")+".000Z")/1000 - Date.parse(txtimestamp.replace(" ","T")+".000Z")/1000);
-					logIt("Length: " + t_lh.data().length);
-					logIt("duration: " + duration);
-					logIt("TxTimestamp: " + txtimestamp);
-					t_lh.rows( function ( idx, data, node ) {
-						if(data[0] == getLocaltimeFromTimestamp(txtimestamp)){
-							rowIndexes.push(idx);
-						}
-						return false;
-					});
-					logIt(rowIndexes);
-					if (rowIndexes[0]) {
+						logIt(callsign);
+						t_lh.rows( function ( idx, data, node ) {
+							if(data[1] == callsign){
+								logIt("Adding " + callsign + " to Array!");
+								rowIndexes.push(idx);
+							}
+							return false;
+						});
+						logIt("rowIndexes: " + rowIndexes);
 						if (rowIndexes[0] == "0") {
 							rowIndexes[0] = rowIndexes[1];
 						}
-						
-						var temp = t_lh.row(rowIndexes[0]).data();
-						
-						newData = [
-							temp[0],
-							temp[1],
-							temp[2],
-							temp[3],
-							duration,
-							temp[5]
-						]
-						t_lh.row(rowIndexes[0]).data( newData ).draw(false);
-						var row = t_lh.row(rowIndexes[0]).node();
-						$(row).removeClass('red');
-					} else {
-						var temp = t_lh.row(t_lh.data().length - 1).data();
-						temp[4] = duration;
-						logIt("temp[4]: " + temp[4]);
-						var row = t_lh.row(t_lh.data().length - 1).node();
-						$(row).removeClass('red');
-						$('#lastHeard').dataTable().fnUpdate(temp,t_lh.data().length - 1,undefined,false);
+						if (rowIndexes[0]) {
+							
+							newData = [
+								timestamp,
+								callsign,
+								target,
+								gateway,
+								duration,
+								addToQSO
+							]
+							t_lh.row(rowIndexes[0]).data( newData ).draw(false);
+							var row = t_lh.row(rowIndexes[0]).node();
+							if (line.indexOf("blocked/") > 0) {
+								$(row).removeClass('red');
+							} else {
+								$(row).addClass('red');
+							}
+						} else {
+							t_lh.row.add( [
+								timestamp,
+								callsign,
+								target,
+								gateway,
+								duration,
+								addToQSO
+							] ).draw(false);
+							var row = t_lh.row(t_lh.data().length - 1).node();
+							if (line.indexOf("blocked/") > 0) {
+								$(row).removeClass('red');
+							} else {
+								$(row).addClass('red');
+							}
+						}
 					}
-					txing = false;
-					txingdata = null;
+					// End of transmission
+					if (line.indexOf("Network watchdog has expired") > 0 || line.indexOf("Received end of transmission") > 0 || line.indexOf("Removed from blockeds") > 0 ) {
+						var rowIndexes = [];
+						if (line.indexOf("Network watchdog has expired") > 0) {
+							logIt("Network Watchdog!");
+						}
+						if (line.indexOf("Received end of transmission") > 0) {
+							logIt("end of transmission!");
+						}
+						
+						duration = Math.round(Date.parse(getRawTimestamp(line).replace(" ","T")+".000Z")/1000 - Date.parse(txtimestamp.replace(" ","T")+".000Z")/1000);
+						logIt("Length: " + t_lh.data().length);
+						logIt("duration: " + duration);
+						logIt("TxTimestamp: " + txtimestamp);
+						t_lh.rows( function ( idx, data, node ) {
+							if(data[0] == getLocaltimeFromTimestamp(txtimestamp)){
+								rowIndexes.push(idx);
+							}
+							return false;
+						});
+						logIt(rowIndexes);
+						if (rowIndexes[0]) {
+							if (rowIndexes[0] == "0") {
+								rowIndexes[0] = rowIndexes[1];
+							}
+							
+							var temp = t_lh.row(rowIndexes[0]).data();
+							
+							newData = [
+								temp[0],
+								temp[1],
+								temp[2],
+								temp[3],
+								duration,
+								temp[5]
+							]
+							t_lh.row(rowIndexes[0]).data( newData ).draw(false);
+							var row = t_lh.row(rowIndexes[0]).node();
+							$(row).removeClass('red');
+						} else {
+							var temp = t_lh.row(t_lh.data().length - 1).data();
+							temp[4] = duration;
+							logIt("temp[4]: " + temp[4]);
+							var row = t_lh.row(t_lh.data().length - 1).node();
+							$(row).removeClass('red');
+							$('#lastHeard').dataTable().fnUpdate(temp,t_lh.data().length - 1,undefined,false);
+						}
+						txing = false;
+						txingdata = null;
+					}
 				}
 			}
 		});
@@ -348,88 +362,90 @@ function getAllHeard(document, event) {
 		lines = event.data.split("\n");
 		lines.forEach(function(line, index, array) {
 			logIt(line);
-			txing = false;
-			var duration = 0;
-			
-			// Check, if begin or end of transmission
-			
-			if (line.length > 0 && (((line.indexOf("ata from") > 0 || line.indexOf("Network watchdog has expired") > 0 || line.indexOf("Received end of transmission") > 0) && showBlockedTX == 0 && line.indexOf("blocked/") < 0) || showBlockedTX == 1 && (line.indexOf("ata from") > 0 || line.indexOf("Network watchdog has expired") > 0 || line.indexOf("Received end of transmission") > 0))) {
-				// Begin of transmission
-				if (line.indexOf("ata from") > 0) {
-					txing = true;
-					
-					txtimestamp = getRawTimestamp(line);
-					var rowIndexes = [],
-					timestamp = getTimestamp(line),
-					callsign = getCallsign(line),
-					target = getTarget(line),
-					gateway = getGateway(line),
-					duration = getDuration(line);
-					duration = "TXing";
-					logIt(callsign);
-					
-					t_allh.row.add( [
-						timestamp,
-						callsign,
-						target,
-						gateway,
-						duration
-					] ).draw(false);
-					var row = t_allh.row(t_allh.data().length - 1).node();
-					if (line.indexOf("blocked/") > 0) {
-						$(row).removeClass('red');
-					} else {
-						$(row).addClass('red');
-					}
-				}
-				// End of transmission
-				if (((line.indexOf("Network watchdog has expired") > 0 || line.indexOf("Received end of transmission") > 0) && showBlockedTX == 0 && line.indexOf("blocked/") < 0) || showBlockedTX == 1 && (line.indexOf("ata from") > 0 || line.indexOf("Network watchdog has expired") > 0 || line.indexOf("Received end of transmission") > 0)) {
-					var rowIndexes = [];
-					if (line.indexOf("Network watchdog has expired") > 0) {
-						logIt("Network Watchdog!");
-					}
-					if (line.indexOf("Received end of transmission") > 0) {
-						logIt("end of transmission!");
-					}
-					
-					duration = Math.round(Date.parse(getRawTimestamp(line).replace(" ","T")+".000Z")/1000 - Date.parse(txtimestamp.replace(" ","T")+".000Z")/1000);
-					logIt("Length: " + t_allh.data().length);
-					logIt("duration: " + duration);
-					logIt("TxTimestamp: " + txtimestamp);
-					t_allh.rows( function ( idx, data, node ) {
-						logIt(getLocaltimeFromTimestamp(txtimestamp));
-						if(data[0] == getLocaltimeFromTimestamp(txtimestamp)){
-							rowIndexes.push(idx);
-						}
-						return false;
-					});
-					logIt(rowIndexes);
-					if (rowIndexes[0]) {
-						if (rowIndexes[0] == "0") {
-							rowIndexes[0] = rowIndexes[1];
-						}
+			if (!inDashboardBlacklist(line)) {
+				txing = false;
+				var duration = 0;
+				
+				// Check, if begin or end of transmission
+				
+				if (line.length > 0 && (((line.indexOf("ata from") > 0 || line.indexOf("Network watchdog has expired") > 0 || line.indexOf("Received end of transmission") > 0) && showBlockedTX == 0 && line.indexOf("blocked/") < 0) || showBlockedTX == 1 && (line.indexOf("ata from") > 0 || line.indexOf("Network watchdog has expired") > 0 || line.indexOf("Received end of transmission") > 0))) {
+					// Begin of transmission
+					if (line.indexOf("ata from") > 0) {
+						txing = true;
 						
-						var temp = t_allh.row(rowIndexes[0]).data();
+						txtimestamp = getRawTimestamp(line);
+						var rowIndexes = [],
+						timestamp = getTimestamp(line),
+						callsign = getCallsign(line),
+						target = getTarget(line),
+						gateway = getGateway(line),
+						duration = getDuration(line);
+						duration = "TXing";
+						logIt(callsign);
 						
-						newData = [
-							temp[0],
-							temp[1],
-							temp[2],
-							temp[3],
+						t_allh.row.add( [
+							timestamp,
+							callsign,
+							target,
+							gateway,
 							duration
-						]
-						t_allh.row(rowIndexes[0]).data( newData ).draw(false);
-						var row = t_allh.row(rowIndexes[0]).node();
-						$(row).removeClass('red');
-					} else {
-						var temp = t_allh.row(t_allh.data().length - 1).data();
-						temp[4] = duration;
-						logIt("temp[4]: " + temp[4]);
+						] ).draw(false);
 						var row = t_allh.row(t_allh.data().length - 1).node();
-						$(row).removeClass('red');
-						$('#allHeard').dataTable().fnUpdate(temp,t_allh.data().length - 1,undefined,false);
+						if (line.indexOf("blocked/") > 0) {
+							$(row).removeClass('red');
+						} else {
+							$(row).addClass('red');
+						}
 					}
-					txing = false;
+					// End of transmission
+					if (((line.indexOf("Network watchdog has expired") > 0 || line.indexOf("Received end of transmission") > 0) && showBlockedTX == 0 && line.indexOf("blocked/") < 0) || showBlockedTX == 1 && (line.indexOf("ata from") > 0 || line.indexOf("Network watchdog has expired") > 0 || line.indexOf("Received end of transmission") > 0)) {
+						var rowIndexes = [];
+						if (line.indexOf("Network watchdog has expired") > 0) {
+							logIt("Network Watchdog!");
+						}
+						if (line.indexOf("Received end of transmission") > 0) {
+							logIt("end of transmission!");
+						}
+						
+						duration = Math.round(Date.parse(getRawTimestamp(line).replace(" ","T")+".000Z")/1000 - Date.parse(txtimestamp.replace(" ","T")+".000Z")/1000);
+						logIt("Length: " + t_allh.data().length);
+						logIt("duration: " + duration);
+						logIt("TxTimestamp: " + txtimestamp);
+						t_allh.rows( function ( idx, data, node ) {
+							logIt(getLocaltimeFromTimestamp(txtimestamp));
+							if(data[0] == getLocaltimeFromTimestamp(txtimestamp)){
+								rowIndexes.push(idx);
+							}
+							return false;
+						});
+						logIt(rowIndexes);
+						if (rowIndexes[0]) {
+							if (rowIndexes[0] == "0") {
+								rowIndexes[0] = rowIndexes[1];
+							}
+							
+							var temp = t_allh.row(rowIndexes[0]).data();
+							
+							newData = [
+								temp[0],
+								temp[1],
+								temp[2],
+								temp[3],
+								duration
+							]
+							t_allh.row(rowIndexes[0]).data( newData ).draw(false);
+							var row = t_allh.row(rowIndexes[0]).node();
+							$(row).removeClass('red');
+						} else {
+							var temp = t_allh.row(t_allh.data().length - 1).data();
+							temp[4] = duration;
+							logIt("temp[4]: " + temp[4]);
+							var row = t_allh.row(t_allh.data().length - 1).node();
+							$(row).removeClass('red');
+							$('#allHeard').dataTable().fnUpdate(temp,t_allh.data().length - 1,undefined,false);
+						}
+						txing = false;
+					}
 				}
 			}
 		});

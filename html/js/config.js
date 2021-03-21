@@ -1,5 +1,5 @@
 // config structure version, please change to value in github-file after update and adding new values
-var config_struc_ver = 20210318.01;
+var config_struc_ver = 20210321.01;
 
 // 1 = show link to QRZ.com, 0 = off
 var qrz = 1;
@@ -28,3 +28,14 @@ var showBlockedTX = 0; // Optional for pysfreflector by IU5JAE
 
 // Set this to to the section-name in your logtailer.ini that contains the logpath of your reflector
 var WebsocketsPath = "YSFReflector";
+
+// Array of callsigns that should not be linked to qrz.com
+var qrz_blacklist = [
+"N0CALL",
+]
+
+// Array of callsigns that should generally not be listed on the dashboard
+
+var dashboard_blacklist = [
+"MY0CALL",
+]
