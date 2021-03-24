@@ -145,8 +145,11 @@ function getDuration(logline) {
 }
 
 function getAddToQSO(logline) {
-	callsign = logline.substring(logline.indexOf("from") + 5, logline.indexOf("to")).trim();
-	retval = '<div class="bd-clipboard"><button type="button" class="btn-cpQSO" title="Copy to QSO" id="' + callsign + '" onclick="copyToQSO(\'' + callsign + '\')">Copy</button></div>';
+	retval = "";
+	if (qso > 0) {
+		callsign = logline.substring(logline.indexOf("from") + 5, logline.indexOf("to")).trim();
+		retval = '<div class="bd-clipboard"><button type="button" class="btn-cpQSO" title="Copy to QSO" id="' + callsign + '" onclick="copyToQSO(\'' + callsign + '\')">Copy</button></div>';
+	}
 	return retval;
 }
 

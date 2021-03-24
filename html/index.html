@@ -326,6 +326,12 @@
 						$(row).addClass('red');
 						}
 					},
+					"columnDefs": [
+						{
+							"targets": [ 5 ],
+							"visible": qso > 0
+						}
+					],
 				"order": [[ 0, "desc" ]],
 				"autoWidth": false
 			} );
