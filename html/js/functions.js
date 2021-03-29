@@ -507,6 +507,14 @@ function getMutedGateways(document, event) {
 
 function getSysInfo(document, event) {
 	$(document).ready(function() {
+		if (event.data.startsWith("REFLECTORINFO")) {
+			logIt(event.data);
+			data = event.data;
+			data = data.substring(data.indexOf(" ") + 1);
+			document.getElementById("ysfreflector_version").innerHTML = data.substring(data.indexOf("ysfreflector_version:") + 21, data.indexOf(" ysfreflector_ctime"));
+			data = data.substring(data.indexOf(" ") + 1);
+			document.getElementById("built").innerHTML = data.substring(data.indexOf("ysfreflector_ctime:") + 19);
+		}
 		if (event.data.startsWith("SYSINFO")) { 
 			logIt(event.data);
 			data = event.data;

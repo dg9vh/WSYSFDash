@@ -16,6 +16,8 @@ from ansi2html import Ansi2HTMLConverter
 from os import popen
 import psutil
 import ssl
+import subprocess
+import time
 
 current_dir = os.getcwd()
 config = configparser.ConfigParser()
@@ -108,6 +110,11 @@ async def view_log(websocket, path):
                     else:
                         await asyncio.sleep(0.2)
         elif path == "/SYSINFO":
+            ysfreflector_version = str(subprocess.Popen(config['YSFReflector']['YSFReflector_bin'] + " -v", shell=True, stdout=subprocess.PIPE).stdout.read().decode("utf-8"))
+            ysfreflector_ctime = time.ctime(os.path.getmtime(config['YSFReflector']['YSFReflector_bin']))
+            ysfreflector_buildtime = datetime.datetime.strptime(ysfreflector_ctime, "%a %b %d %H:%M:%S %Y")
+            await websocket.send("REFLECTORINFO: ysfreflector_version:" + ysfreflector_version + " ysfreflector_ctime:" + ysfreflector_ctime)
+            await asyncio.sleep(1)
             while True:
                 cpu_temp = ""
                 temps = psutil.sensors_temperatures()
