@@ -1,8 +1,10 @@
-var act_config_struc_ver = 20210321.01;
+var act_config_struc_ver = 20210403.01;
 var txingdata = null;
 var txtimestamp = "";
 var fill_gw = false;
 var fill_mgw = false;
+var array_gateways = [];
+
 
 setInterval(getCurrentTXing, 1000);
 // 00000000001111111111222222222233333333334444444444555555555566666666667777777777888888888899999999990000000000111111111122222222223333333333
@@ -207,7 +209,7 @@ function getCurrentTXing() {
 }
 
 function getGatewayCallsign(line) {
-	return line.substring(31, 42);
+	return line.substring(31, 42).trim();
 }
 
 function getGatewayIpAndPort(line) {
@@ -221,6 +223,9 @@ function getLastHeard(document, event) {
 // M: 2020-11-28 10:10:09.729     DB1ZD     : 3/60
 // M: 2020-11-28 10:10:09.729     2622-DL   : 1/60
 // M: 2020-11-28 10:10:09.729     DO8DHH    : 0/60
+// M: 2021-04-03 20:14:52.208      DG9VH     : 192.168.178.33:42011 2/60
+// M: 2021-04-03 20:14:52.209      DG9VH     : 88.68.80.167:58093 3/60
+
 // M: 2020-11-28 10:11:26.555 Received data from DL5STX     to ALL        at 2622-DL
 // M: 2020-11-28 10:11:27.317 Received end of transmission
 // M: 2020-11-28 11:02:25.347 Network watchdog has expired
@@ -455,8 +460,59 @@ function getAllHeard(document, event) {
 	});
 }
 
+function addToGateways(timestamp, connected_since, gateway, ip_port) {
+	var newGateway = new Array();
+	newGateway[0] = timestamp;
+	newGateway[1] = connected_since;
+	newGateway[2] = gateway;
+	newGateway[3] = ip_port;
+	array_gateways.push(newGateway);
+}
+
+function removeFromGateways(gateway, ip_port) {
+	for (i = 0; i < array_gateways.length; ++i ) {
+		actual_gateway = array_gateways[i];
+		if (actual_gateway[2] == gateway && actual_gateway[3] == ip_port) {
+			array_gateways.splice(i, 1);
+		}
+	}
+}
+
+function insertOrUpdateGatways(timestamp, gateway, ip_port) {
+	updated = false;
+	for (i = 0; i < array_gateways.length; ++i){
+		actual_gateway = array_gateways[i];
+		if (actual_gateway[2] == gateway && actual_gateway[3] == ip_port) {
+			var newGateway = new Array();
+			newGateway[0] = timestamp;
+			newGateway[1] = actual_gateway[1];
+			newGateway[2] = gateway;
+			newGateway[3] = ip_port;
+			array_gateways[i] = newGateway;
+			updated = true;
+		}
+	}
+	if (updated == false) {
+		addToGateways(timestamp, "unknown", gateway, ip_port);
+	}
+}
+
+function getAddedGateway(line) {
+	return line.substring(line.indexOf("Adding ") + 7, line.indexOf("(")).trim();
+}
+
+function getRemovedGateway(line) {
+	return line.substring(line.indexOf("Removing ") + 9, line.indexOf("(")).trim();
+}
+
+function getAddedIpAndPort(line) {
+	return line.substring(line.indexOf(" (") + 2, line.indexOf(")"));
+}
+
 // 00000000001111111111222222222233333333334444444444555555555566666666667777777777888888888899999999990000000000111111111122222222223333333333
 // 01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+// M: 2021-04-03 14:46:10.970 Adding DG9VH      (192.168.178.33:42011)
+// M: 2021-04-03 19:36:20.891 Removing DG9VH      (88.68.80.167:59579) unlinked
 // M: 2020-11-28 10:10:09.729 Currently linked repeaters/gateways:
 // M: 2020-11-28 10:10:09.729     DB1ZD     : 3/60
 // M: 2020-11-28 10:10:09.729     2622-DL   : 1/60
@@ -465,20 +521,36 @@ function getGateways(document, event) {
 	$(document).ready(function() {
 		lines = event.data.split("\n");
 		lines.forEach(function(line, index, array) {
+			if (line.indexOf("Starting") > 0) {
+				array_gateways = [];
+			}
+			if (line.indexOf("Adding") > 0 ) {
+				addToGateways(getTimestamp(line), getTimestamp(line), getAddedGateway(line), getAddedIpAndPort(line));
+			}
+			if (line.indexOf("Removing") > 0 ) {
+				removeFromGateways(getRemovedGateway(line), getAddedIpAndPort(line));
+			}
 			if( (Date.now() - Date.parse(getRawTimestamp(line).replace(" ","T")+".000Z"))/1000 < 125) {
+				
 				if (line.indexOf("Currently linked repeaters") > 0 ) {
 					t_gw.clear().draw(false);
 					fill_mgw = false;
 					fill_gw = true;
 				}
 				if (line.indexOf("/60") > 0 && fill_gw) {
-					t_gw.row.add( [
-						getTimestamp(line),
-						getGatewayCallsign(line),
-						getGatewayIpAndPort(line)
-					] ).draw(false);
+					insertOrUpdateGatways(getTimestamp(line), getGatewayCallsign(line), getGatewayIpAndPort(line));
 				}
-			}
+			} 
+			t_gw.clear().draw(false);
+			array_gateways.forEach(function(gateway){
+				t_gw.row.add( [
+					gateway[0],
+					gateway[1],
+					gateway[2],
+					gateway[3]
+				] ).draw(false);
+			});
+			
 		});
 	});
 }
@@ -496,6 +568,7 @@ function getMutedGateways(document, event) {
 				if (line.indexOf("/60") > 0 && fill_mgw) {
 					t_mgw.row.add( [
 						getTimestamp(line),
+						"",
 						getGatewayCallsign(line),
 						getGatewayIpAndPort(line)
 					] ).draw(false);

@@ -187,6 +187,7 @@
 										<th>Time (<script language="JavaScript">
 										document.write(getTimezone());
 										</script>)</th>
+										<th>Connected since</th>
 										<th>Callsign</th>
 										<th>IP/Port</th>
 									</tr>
@@ -209,6 +210,7 @@
 										<th>Time (<script language="JavaScript">
 										document.write(getTimezone());
 										</script>)</th>
+										<th>Connected since</th>
 										<th>Callsign</th>
 										<th>IP/Port</th>
 									</tr>
@@ -307,7 +309,11 @@
 				"order": [[ 1, "asc" ]],
 				"columnDefs": [
 					{
-						"targets": [ 2 ],
+						"targets": [ 1 ],
+						"visible": showConnectedSince
+					},
+					{
+						"targets": [ 3 ],
 						"visible": showGatewayIP
 					}
 				],
@@ -318,7 +324,11 @@
 				"order": [[ 1, "asc" ]],
 				"columnDefs": [
 					{
-						"targets": [ 2 ],
+						"targets": [ 1 ],
+						"visible": showConnectedSince
+					},
+					{
+						"targets": [ 3 ],
 						"visible": showGatewayIP
 					}
 				],

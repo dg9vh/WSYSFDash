@@ -1,5 +1,5 @@
 // config structure version, please change to value in github-file after update and adding new values
-var config_struc_ver = 20210321.01;
+var config_struc_ver = 20210403.01;
 
 // 1 = show link to QRZ.com, 0 = off
 var qrz = 1;
@@ -22,6 +22,9 @@ var useClientTimezone = 1;
 
 // 1 = show IP-Addresses of gateway on each gateway tab, 0 = off
 var showGatewayIP = 0;
+
+// 1 = show gateway's connected since time, 0 = off
+var showConnectedSince = 1;
 
 // 1 = show blocked transmissions on heard-lists, 0 = off
 var showBlockedTX = 0; // Optional for pysfreflector by IU5JAE
