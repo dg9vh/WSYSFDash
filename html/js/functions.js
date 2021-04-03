@@ -540,17 +540,17 @@ function getGateways(document, event) {
 				if (line.indexOf("/60") > 0 && fill_gw) {
 					insertOrUpdateGatways(getTimestamp(line), getGatewayCallsign(line), getGatewayIpAndPort(line));
 				}
-			} 
-			t_gw.clear().draw(false);
-			array_gateways.forEach(function(gateway){
-				t_gw.row.add( [
-					gateway[0],
-					gateway[1],
-					gateway[2],
-					gateway[3]
-				] ).draw(false);
-			});
-			
+			 
+				t_gw.clear().draw(false);
+				array_gateways.forEach(function(gateway){
+					t_gw.row.add( [
+						gateway[0],
+						gateway[1],
+						gateway[2],
+						gateway[3]
+					] ).draw(false);
+				});
+			}
 		});
 	});
 }
