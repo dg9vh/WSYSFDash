@@ -5,6 +5,8 @@ After=network.target
 [Service]
 ExecStartPre=/bin/sleep 10
 Type=simple
+User=mmdvm
+Group=mmdvm
 Restart=always
 # Modify for different location of Python3 or location of files
 WorkingDirectory=/opt/WSYSFDash/

@@ -5,6 +5,8 @@ After=network.target
 [Service]
 ExecStartPre=/bin/sleep 10
 Type=simple
+User=mmdvm
+Group=mmdvm
 Restart=always
 # Modify for different location of Python3 or other port
 ExecStart=/usr/bin/python3 -m http.server 8000 --directory /opt/WSYSFDash/html
