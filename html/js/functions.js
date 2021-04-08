@@ -213,7 +213,16 @@ function getGatewayCallsign(line) {
 }
 
 function getGatewayIpAndPort(line) {
-	return line.substring(44, line.lastIndexOf(" "));
+	return line.substring(44, line.indexOf("/60") - 2).trim();
+}
+
+function getConnectedSince(line) {
+	retval = line.substr(line.indexOf("/60") + 3);
+	if (retval.indexOf(":") > 0) {
+		return retval.substr(retval.indexOf(":") + 1);
+	} else {
+		return null;
+	}
 }
 
 function getLastHeard(document, event) {
@@ -478,7 +487,10 @@ function removeFromGateways(gateway, ip_port) {
 	}
 }
 
-function insertOrUpdateGatways(timestamp, gateway, ip_port) {
+function insertOrUpdateGatways(line) {
+	timestamp = getTimestamp(line)
+	gateway = getGatewayCallsign(line);
+	ip_port = getGatewayIpAndPort(line);
 	updated = false;
 	for (i = 0; i < array_gateways.length; ++i){
 		actual_gateway = array_gateways[i];
@@ -493,7 +505,11 @@ function insertOrUpdateGatways(timestamp, gateway, ip_port) {
 		}
 	}
 	if (updated == false) {
-		addToGateways(timestamp, "unknown", gateway, ip_port);
+		connected_since = getConnectedSince(line);
+		if (connected_since == null)
+			addToGateways(timestamp, "unknown", gateway, ip_port);
+		else
+			addToGateways(timestamp, getLocaltimeFromTimestamp(connected_since), gateway, ip_port);
 	}
 }
 
@@ -538,7 +554,7 @@ function getGateways(document, event) {
 					fill_gw = true;
 				}
 				if (line.indexOf("/60") > 0 && fill_gw) {
-					insertOrUpdateGatways(getTimestamp(line), getGatewayCallsign(line), getGatewayIpAndPort(line));
+					insertOrUpdateGatways(line);
 				}
 			 
 				t_gw.clear().draw(false);
