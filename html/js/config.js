@@ -1,5 +1,5 @@
 // config structure version, please change to value in github-file after update and adding new values
-var config_struc_ver = 20210403.01;
+var config_struc_ver = 20210514.01;
 
 // 1 = show link to QRZ.com, 0 = off
 var qrz = 1;
@@ -42,3 +42,12 @@ var qrz_blacklist = [
 var dashboard_blacklist = [
 "MY0CALL",
 ]
+
+// Here you can set the content of the show x entries selectbox
+var datatable_length_menu =  [ 
+[10, 25, 50, 100, -1], 
+[10, 25, 50, 100, "All"] 
+]
+
+// Here the default-selected value in the selectbox is defined (for show x entries)
+var datatable_default_length = 10;

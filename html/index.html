@@ -317,7 +317,9 @@
 						"visible": showGatewayIP
 					}
 				],
-				"autoWidth": false
+				"autoWidth": false,
+				"lengthMenu": datatable_length_menu,
+				"pageLength": datatable_default_length
 			} );
 			
 			var t_mgw = $('#mutedgatewaysTable').DataTable( {
@@ -332,6 +334,8 @@
 						"visible": showGatewayIP
 					}
 				],
+				"lengthMenu": datatable_length_menu,
+				"pageLength": datatable_default_length,
 				"autoWidth": false
 			} );
 			
@@ -348,7 +352,10 @@
 						}
 					],
 				"order": [[ 0, "desc" ]],
-				"autoWidth": false
+				"autoWidth": false,
+				"lengthMenu": datatable_length_menu,
+				"pageLength": datatable_default_length
+
 			} );
 			
 			var t_allh = $('#allHeard').DataTable( {
@@ -358,7 +365,10 @@
 						}
 					},
 				"order": [[ 0, "desc" ]],
-				"autoWidth": false
+				"autoWidth": false,
+				"lengthMenu": datatable_length_menu,
+				"pageLength": datatable_default_length
+
 			} );
 			
 			var wsprot = "ws://";
@@ -383,7 +393,9 @@
 			
 			var t_qso = $('#inQSO').DataTable( {
 				"order": [[ 2, "asc" ]],
-				"autoWidth": false
+				"autoWidth": false,
+				"lengthMenu": datatable_length_menu,
+				"pageLength": datatable_default_length
 			} );
 			
 			$('#inQSO tbody').on( 'click', 'tr', function () {

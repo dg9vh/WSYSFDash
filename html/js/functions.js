@@ -1,4 +1,4 @@
-var act_config_struc_ver = 20210403.01;
+var act_config_struc_ver = 20210514.01;
 var txingdata = null;
 var txtimestamp = "";
 var fill_gw = false;
