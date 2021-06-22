@@ -380,7 +380,7 @@ function getLastHeard(document, event) {
 								target,
 								gateway,
 								duration,
-								"",
+								voicemode,
 								"",
 								addToQSO
 							] ).draw(false);
