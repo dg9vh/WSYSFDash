@@ -1,4 +1,4 @@
-var act_config_struc_ver = 20210514.01;
+var act_config_struc_ver = 20210622.01;
 var txingdata = null;
 var txtimestamp = "";
 var fill_gw = false;
@@ -32,6 +32,16 @@ function checkConfigStructure() {
 	}
 }
 
+Date.prototype.stdTimezoneOffset = function () {
+	var jan = new Date(this.getFullYear(), 0, 1);
+	var jul = new Date(this.getFullYear(), 6, 1);
+	return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+}
+
+Date.prototype.isDstObserved = function () {
+	return this.getTimezoneOffset() < this.stdTimezoneOffset();
+}
+
 function getTimezone() {
 	if (useClientTimezone) {
 		var d = new Date();
@@ -51,7 +61,10 @@ function getTimezone() {
 			offset = "UTC" + (offset >= 0 ? "+" + offset : offset);
 			timezone = timezonenames[offset];
 		}
-
+		
+		if (d.isDstObserved() && timezone == "EET")
+			timezone = "CEST";
+		
 		return timezone;
 	} else {
 		return "UTC";
@@ -102,8 +115,9 @@ function getCallsign(logline) {
 	}
 }
 
-// 00000000001111111111222222222233333333334444444444555555555566666666667777777777888888888899999999990000000000111111111122222222223333333333
-// 01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+// 000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888999999999900000000001111111111222222222233333333334444444444555555555566666666667777777
+// 012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456
+// M: 2021-06-21 21:05:13.248 Received data from DG9VH      to *****E0B8f at DG9VH      FICH-Data: CS:2 | CM:1 | FT:7 | Dev:False | MR:0 | VoIP:False | DT:2 | SQL:False | SQC:0
 // M: 2020-11-28 11:12:41.770 Received data from DO1KHI     to ALL        at DB0WK
 // M: 2020-11-28 10:10:09.729 Currently linked repeaters/gateways:
 // M: 2020-11-28 10:10:09.729     DB1ZD     : 3/60
@@ -112,16 +126,15 @@ function getCallsign(logline) {
 // M: 2021-03-12 17:31:33.004      DG9VH     : 192.168.178.33:42011 3/60
 // M: 2020-11-28 10:11:26.555 Received data from DL5STX     to ALL        at 2622-DL
 // M: 2020-11-28 10:11:27.317 Received end of transmission
-
 function getTarget(logline) {
 	val = "";
-	if(logline.indexOf("at") > 0 && logline.indexOf("to") > 0) {
-		return logline.substring(logline.indexOf("to") + 3, logline.lastIndexOf("at"));
+	if(logline.indexOf("at") > 0 && logline.indexOf(" to ") > 0) {
+		return logline.substring(logline.indexOf(" to ") + 4, logline.lastIndexOf(" at "));
 	} else {
 		if (logline.indexOf("blocked/") > 0 ) {
 			val = "muted";
 		} else {
-			val = logline.substring(logline.indexOf("to") + 3);
+			val = logline.substring(logline.indexOf(" to ") + 4);
 		}
 		if (val.indexOf(",") > 0) {
 			val = val.substring(0, val.indexOf(","));
@@ -131,8 +144,10 @@ function getTarget(logline) {
 }
 
 function getGateway(logline) {
-	if(logline.indexOf("at ") > 0) {
-		return logline.substring(logline.indexOf("at ") + 3);
+	if(logline.indexOf("at ") > 0 && logline.indexOf(" FICH-Data: ") > 0) {
+		return logline.substring(logline.indexOf(" at ") + 4, logline.indexOf(" FICH-Data: "));
+	} else {
+		return logline.substring(logline.indexOf(" at ") + 4);
 	}
 }
 
@@ -146,6 +161,55 @@ function getDuration(logline) {
 	}
 }
 
+function getVoiceMode(logline) {
+	if (logline.lastIndexOf(" | DT:") > 0 && logline.indexOf(" FICH-Data: ") > 0) {
+		val = logline.substring(logline.lastIndexOf(" | DT:") + 6);
+		val = parseInt(val.substring(0, val.indexOf(" |")));
+		switch (val) {
+			case 0:
+				val = "Voice Narrow (DN)";
+				break;
+			case 1:
+				val = "High Speed Data";
+				break;
+			case 2:
+				val = "Voice Narrow (DN)";
+				break;
+			case 3:
+				val = "Voice Wide (VW)";
+				break;
+			default:
+				val = "Voice Narrow (DN)";
+				break;
+		}
+		return val;
+	} else {
+		return "";
+	}
+}
+
+// 000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888999999999900000000001111111111222222222233333333334444444444555555555566666666667777777
+// 012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456
+// M: 2021-06-21 21:17:02.706 Received end of transmission coords: 49.231833, 6.834833 | 47/0
+function getCoordinates(logline) {
+	if (logline.lastIndexOf(" coords: ") > 0) {
+		val = logline.substring(logline.lastIndexOf(" coords: ") + 9, logline.lastIndexOf(" | "));
+		latitude = val.substring(0, val.lastIndexOf(","));
+		latitudestring = (latitude >= 0) ? latitude + "N" : latitude + "S";
+		longitude = val.substring(val.lastIndexOf(",") + 2);
+		longitudestring = (longitude >= 0) ? longitude + "E" : longitude + "W";
+		if (parseInt(latitude) == 999) {
+			return "invalid data";
+		} else {
+			val = latitudestring + ", " + longitudestring + " ";
+			if (osm > 0)
+				val += getOSMLink(latitude, longitude);
+			return val;
+		}
+	} else {
+		return "";
+	}
+}
 function getAddToQSO(logline) {
 	retval = "";
 	if (qso > 0) {
@@ -153,6 +217,11 @@ function getAddToQSO(logline) {
 		retval = '<div class="bd-clipboard"><button type="button" class="btn-cpQSO" title="Copy to QSO" id="' + callsign + '" onclick="copyToQSO(\'' + callsign + '\')">Copy</button></div>';
 	}
 	return retval;
+}
+
+function getOSMLink(latitude, longitude) {
+	//https://www.openstreetmap.org/?mlat=49.2317&mlon=6.7920#map=12/49.2317/6.7920
+	return '<a target="_new" href="https://www.openstreetmap.org/?mlat='+latitude+'&mlon='+longitude+'#map=12/'+latitude+'/'+longitude+'"><span class="iconify" data-icon="oi:signpost" data-inline="false"></span></a>';
 }
 
 function clocktime() {
@@ -269,6 +338,7 @@ function getLastHeard(document, event) {
 						duration = getDuration(line),
 						addToQSO = getAddToQSO(line);
 						duration = "TXing";
+						voidemode = getVoiceMode(line);
 						if (line.indexOf("blocked/") > 0) {
 							duration = "muted";
 						}
@@ -292,6 +362,8 @@ function getLastHeard(document, event) {
 								target,
 								gateway,
 								duration,
+								voicemode,
+								"",
 								addToQSO
 							]
 							t_lh.row(rowIndexes[0]).data( newData ).draw(false);
@@ -308,6 +380,8 @@ function getLastHeard(document, event) {
 								target,
 								gateway,
 								duration,
+								"",
+								"",
 								addToQSO
 							] ).draw(false);
 							var row = t_lh.row(t_lh.data().length - 1).node();
@@ -352,7 +426,9 @@ function getLastHeard(document, event) {
 								temp[2],
 								temp[3],
 								duration,
-								temp[5]
+								temp[5],
+								getCoordinates(line),
+								temp[7]
 							]
 							t_lh.row(rowIndexes[0]).data( newData ).draw(false);
 							var row = t_lh.row(rowIndexes[0]).node();
@@ -398,6 +474,7 @@ function getAllHeard(document, event) {
 						gateway = getGateway(line),
 						duration = getDuration(line);
 						duration = "TXing";
+						voicemode = getVoiceMode(line);
 						logIt(callsign);
 						
 						t_allh.row.add( [
@@ -405,7 +482,9 @@ function getAllHeard(document, event) {
 							callsign,
 							target,
 							gateway,
-							duration
+							duration,
+							voicemode,
+							""
 						] ).draw(false);
 						var row = t_allh.row(t_allh.data().length - 1).node();
 						if (line.indexOf("blocked/") > 0) {
@@ -448,7 +527,9 @@ function getAllHeard(document, event) {
 								temp[1],
 								temp[2],
 								temp[3],
-								duration
+								duration,
+								temp[5],
+								getCoordinates(line)
 							]
 							t_allh.row(rowIndexes[0]).data( newData ).draw(false);
 							var row = t_allh.row(rowIndexes[0]).node();

@@ -23,6 +23,7 @@
 		<script type="text/javascript" src="js/config.js"></script>
 		<script type="text/javascript" src="js/functions.js"></script>
 		<link rel="stylesheet" href="css/styles.css">
+		<script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
 		<title>DG9VH - YSFReflector-Dashboard by DG9VH</title>
 	</head>
 	<body>
@@ -39,7 +40,7 @@
 					<div class="modal-body">
 						<p>This text is shown to you, because you may use an old config.js-structure. Please open your config.js and compare it with the example-one in github-repository, add missing or change configuration options that has been renamed and add following line (or update existing one to this) into the config.js-file:</p>
 						<p>
-						var config_struc_ver = <script  type="text/javascript">document.write(act_config_struc_ver);</script>
+						var config_struc_ver = <script  type="text/javascript">document.write(config_struc_ver);</script>
 						
 						</p>
 					</div>
@@ -142,6 +143,8 @@
 										<th>Target</th>
 										<th>Gateway</th>
 										<th>Dur (s)</th>
+										<th>Voice-Mode</th>
+										<th>Coordinates</th>
 										<th>QSO</th>
 									</tr>
 								</thead>
@@ -167,6 +170,8 @@
 										<th>Target</th>
 										<th>Gateway</th>
 										<th>Dur (s)</th>
+										<th>Voice-Mode</th>
+										<th>Coordinates</th>
 									</tr>
 								</thead>
 							</table>
@@ -302,55 +307,66 @@
 		</footer>
 		<script>
 			var t_ct = $('#currTX').DataTable( {
-				"order": [[ 0, "asc" ]]
-			} );
-			
-			var t_gw = $('#gatewaysTable').DataTable( {
-				"order": [[ 2, "asc" ]],
+				"order": [[ 0, "asc" ]],
 				"columnDefs": [
 					{
+						"targets": [ 0 ],
+						"visible": callsigncol
+					},
+					{
 						"targets": [ 1 ],
-						"visible": showConnectedSince
+						"visible": targetcol
+					},
+					{
+						"targets": [ 2 ],
+						"visible": gatewaycol
 					},
 					{
 						"targets": [ 3 ],
-						"visible": showGatewayIP
+						"visible": durationcol
 					}
-				],
-				"autoWidth": false,
-				"lengthMenu": datatable_length_menu,
-				"pageLength": datatable_default_length
+				]
 			} );
-			
-			var t_mgw = $('#mutedgatewaysTable').DataTable( {
-				"order": [[ 2, "asc" ]],
-				"columnDefs": [
-					{
-						"targets": [ 1 ],
-						"visible": showConnectedSince
-					},
-					{
-						"targets": [ 3 ],
-						"visible": showGatewayIP
-					}
-				],
-				"lengthMenu": datatable_length_menu,
-				"pageLength": datatable_default_length,
-				"autoWidth": false
-			} );
-			
 			var t_lh = $('#lastHeard').DataTable( {
 				"createdRow": function( row, data, dataIndex ) {
 					if ( data[5] == "TXing" ) {        
 						$(row).addClass('red');
 						}
 					},
-					"columnDefs": [
-						{
-							"targets": [ 5 ],
-							"visible": qso > 0
-						}
-					],
+				"columnDefs": [
+					{
+						"targets": [ 0 ],
+						"visible": timecol
+					},
+					{
+						"targets": [ 1 ],
+						"visible": callsigncol
+					},
+					{
+						"targets": [ 2 ],
+						"visible": targetcol
+					},
+					{
+						"targets": [ 3 ],
+						"visible": gatewaycol
+					},
+					{
+						"targets": [ 4 ],
+						"visible": durationcol
+					},
+					{
+						"targets": [ 5 ],
+						"visible": voicemodecol
+					},
+					{
+						"targets": [ 6 ],
+						"visible": coordscol
+					},
+					{
+						"targets": [ 7 ],
+						"visible": qso > 0
+					}
+				],
 				"order": [[ 0, "desc" ]],
 				"autoWidth": false,
 				"lengthMenu": datatable_length_menu,
@@ -365,11 +381,92 @@
 						}
 					},
 				"order": [[ 0, "desc" ]],
+				"columnDefs": [
+					{
+						"targets": [ 0 ],
+						"visible": timecol
+					},
+					{
+						"targets": [ 1 ],
+						"visible": callsigncol
+					},
+					{
+						"targets": [ 2 ],
+						"visible": targetcol
+					},
+					{
+						"targets": [ 3 ],
+						"visible": gatewaycol
+					},
+					{
+						"targets": [ 4 ],
+						"visible": durationcol
+					},
+					{
+						"targets": [ 5 ],
+						"visible": voicemodecol
+					},
+					{
+						"targets": [ 6 ],
+						"visible": coordscol
+					}
+				],
 				"autoWidth": false,
 				"lengthMenu": datatable_length_menu,
 				"pageLength": datatable_default_length
-
 			} );
+			
+			var t_gw = $('#gatewaysTable').DataTable( {
+				"order": [[ 2, "asc" ]],
+				"columnDefs": [
+					{
+						"targets": [ 0 ],
+						"visible": timecol
+					},
+					{
+						"targets": [ 1 ],
+						"visible": connectedsincecol
+					},
+					{
+						"targets": [ 2 ],
+						"visible": callsigncol
+					},
+					{
+						"targets": [ 3 ],
+						"visible": gatewayipcol
+					}
+				],
+				"autoWidth": false,
+				"lengthMenu": datatable_length_menu,
+				"pageLength": datatable_default_length
+			} );
+			
+			var t_mgw = $('#mutedgatewaysTable').DataTable( {
+				"order": [[ 2, "asc" ]],
+				"columnDefs": [
+					{
+						"targets": [ 0 ],
+						"visible": timecol
+					},
+					{
+						"targets": [ 1 ],
+						"visible": connectedsincecol
+					},
+					{
+						"targets": [ 2 ],
+						"visible": callsigncol
+					},
+					{
+						"targets": [ 3 ],
+						"visible": gatewayipcol
+					}
+				],
+				"lengthMenu": datatable_length_menu,
+				"pageLength": datatable_default_length,
+				"autoWidth": false
+			} );
+			
+			
 			
 			var wsprot = "ws://";
 			if (location.protocol == "https:") {
@@ -393,6 +490,20 @@
 			
 			var t_qso = $('#inQSO').DataTable( {
 				"order": [[ 2, "asc" ]],
+				"columnDefs": [
+					{
+						"targets": [ 0 ],
+						"visible": callsigncol
+					},
+					{
+						"targets": [ 1 ],
+						"visible": addedatcol
+					},
+					{
+						"targets": [ 2 ],
+						"visible": lasttxatcol
+					}
+				],
 				"autoWidth": false,
 				"lengthMenu": datatable_length_menu,
 				"pageLength": datatable_default_length
