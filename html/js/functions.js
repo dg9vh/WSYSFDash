@@ -199,7 +199,7 @@ function getCoordinates(logline) {
 		longitude = val.substring(val.lastIndexOf(",") + 2);
 		longitudestring = (longitude >= 0) ? longitude + "E" : longitude + "W";
 		if (parseInt(latitude) == 999) {
-			return "invalid data";
+			return "no data";
 		} else {
 			val = latitudestring + ", " + longitudestring + " ";
 			if (osm > 0)
