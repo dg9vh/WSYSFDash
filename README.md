@@ -76,8 +76,8 @@ It is also recommended using an explicit webserver for better security behavior,
 If you have already a webserver (apache2 or similar) running on your system, you also can serve the contents within the html-folder by this. Here you only have to copy the folder/the files into the decided web-space and they are available with your regular webserver.
 
 If you are running TLS (https://) you have to enable logtailer.py to use TLS (wss://) also. Here you have to do two thing:
-* in logtailer.ini enable the SSL-Part and configure the correct paths to your cert-chain and key and
-* in the index.html look for the "ws://"-parts and supersede them by "wss://"
+* in logtailer.ini enable the SSL-Part and
+* configure the correct paths to your cert-chain and key
 
 This enables TLS for encrypted and secured transport of your data and prohibits modern browsers from denying to operate on the website. Modern browsers don't like "mixed-mode-content" and therefore they are blocking the contents and do not run the page correctly.
 
