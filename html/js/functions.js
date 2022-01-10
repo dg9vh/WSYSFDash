@@ -7,6 +7,54 @@ var array_gateways = [];
 
 
 setInterval(getCurrentTXing, 1000);
+
+var usedTheme = getCookie("Theme");
+
+if (usedTheme == "") {
+	if (useDarkTheme)
+		usedTheme = "dark";
+	else
+		usedTheme = "bright";
+	setCookie("Theme",usedTheme, 30);
+}
+
+var element = document.createElement("link");
+element.setAttribute("rel", "stylesheet");
+element.setAttribute("type", "text/css");
+element.setAttribute("href", "css/styles-" + usedTheme + ".css");
+document.getElementsByTagName("head")[0].appendChild(element);
+
+function setCookie(cname, cvalue, exdays) {
+	var d = new Date();
+	d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+	var expires = "expires="+d.toUTCString();
+	document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+	var name = cname + "=";
+	var ca = document.cookie.split(';');
+	for(var i = 0; i < ca.length; i++) {
+		var c = ca[i];
+		while (c.charAt(0) == ' ') {
+			c = c.substring(1);
+		}
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length, c.length);
+		}
+	}
+	return "";
+}
+
+function switchTheme() {
+	if (usedTheme == "dark") {
+		setCookie("Theme", "bright", 30);
+	} else {
+		setCookie("Theme", "dark", 30);
+	}
+	document.location.reload();
+}
+
 // 00000000001111111111222222222233333333334444444444555555555566666666667777777777888888888899999999990000000000111111111122222222223333333333
 // 01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
 // M: 2020-11-28 10:10:09.729 Currently linked repeaters/gateways:
