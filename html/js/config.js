@@ -1,5 +1,5 @@
 // config structure version, please change to value in github-file after update and adding new values
-var config_struc_ver = 20210622.01;
+var config_struc_ver = 20220215.01;
 
 // 1 = show link to QRZ.com, 0 = off
 var qrz = 1;
@@ -68,3 +68,5 @@ var datatable_length_menu =  [
 // Here the default-selected value in the selectbox is defined (for show x entries)
 var datatable_default_length = 10;
 
+// 1 = enable dark display theme, 0 = use bright theme
+var useDarkTheme = 0;
