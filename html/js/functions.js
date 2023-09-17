@@ -386,7 +386,7 @@ function getLastHeard(document, event) {
 						duration = getDuration(line),
 						addToQSO = getAddToQSO(line);
 						duration = "TXing";
-						voidemode = getVoiceMode(line);
+						voicemode = getVoiceMode(line);
 						if (line.indexOf("blocked/") > 0) {
 							duration = "muted";
 						}
