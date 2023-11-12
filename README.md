@@ -1,4 +1,6 @@
 ﻿# WSYSFDash
+ 
+_No further development and support!_
 
 ## Introduction
 This is a very first development version of my new WSYSFDash using websockets-Technology.
